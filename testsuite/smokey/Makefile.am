@@ -5,6 +5,10 @@ CCLD = $(top_srcdir)/scripts/wrap-link.sh $(CC)
 
 smokey_SOURCES = main.c
 
+# Make sure to list modules from the most dependent to the
+# least. e.g. net_common should appear after all net_* modules,
+# memcheck should appear after all heapmem-* modules.
+
 COBALT_SUBDIRS = 	\
 	arith 		\
 	bufp		\
@@ -12,6 +16,9 @@ COBALT_SUBDIRS = 	\
 	fpu-stress	\
 	iddp		\
 	leaks		\
+	memory-heapmem	\
+	memory-tlsf	\
+	memcheck	\
 	net_packet_dgram\
 	net_packet_raw	\
 	net_udp		\
@@ -31,11 +38,19 @@ COBALT_SUBDIRS = 	\
 	vdso-access 	\
 	xddp
 
+if XENO_PSHARED
+COBALT_SUBDIRS += memory-pshared
+endif
+
 if CONFIG_XENO_LIBS_DLOPEN
 COBALT_SUBDIRS += dlopen
 endif
 
-MERCURY_SUBDIRS =
+MERCURY_SUBDIRS = memory-heapmem memory-tlsf
+if XENO_PSHARED
+MERCURY_SUBDIRS += memory-pshared
+endif
+MERCURY_SUBDIRS += memcheck
 
 DIST_SUBDIRS = $(COBALT_SUBDIRS) $(MERCURY_SUBDIRS)
 
